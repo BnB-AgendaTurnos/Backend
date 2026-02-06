@@ -1,0 +1,74 @@
+generator client {  //Es para crear la api
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Rol {
+  ADMIN
+  PROFESOR
+  CLIENTE
+}
+
+enum EstadoCuenta {
+  ACTIVA
+  INACTIVA
+}
+
+enum EstadoReserva {
+  RESERVADO
+  CANCELADO
+  ASISTIO
+  AUSENTE
+}
+
+model Usuario {
+  id_usuario        Int       @id @default(autoincrement())
+  nombre            String
+  email             String    @unique
+  contrasena        String
+  telefono          String
+  cuenta_estado     EstadoCuenta
+  rol               Rol
+
+  reserva_turno     Reserva[]
+}
+
+model Sucursal {
+  id_sucursal       Int      @id @default(autoincrement())
+  nombre            String
+  telefono          String
+  direccion         String
+  horario_apertura  DateTime @db.Time
+  horario_cierre    DateTime @db.Time
+
+  turnos            Turno[]
+}
+
+model Turno {
+  id_turno          Int      @id @default(autoincrement())
+  fecha             DateTime
+  hora_inicio       DateTime @db.Time
+  hora_fin          DateTime @db.Time
+  cupo_maximo       Int
+
+  id_sucursal       Int
+  sucursal          Sucursal @relation(fields: [id_sucursal], references: [id_sucursal])
+
+  reservas          Reserva[]
+}
+
+model Reserva {
+  id_reserva        Int      @id @default(autoincrement())
+  reserva_estado    EstadoReserva
+
+  id_usuario        Int
+  usuario           Usuario @relation(fields: [id_usuario], references: [id_usuario])
+
+  id_turno          Int
+  turno             Turno   @relation(fields: [id_turno], references: [id_turno])
+
+  //@@unique([id_usuario, id_turno])
+}
